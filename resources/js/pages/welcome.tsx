@@ -1,19 +1,25 @@
-import { Button } from "@/components/ui/button";
+import { Head } from '@inertiajs/react';
+
+import { Footer } from '@/components/footer';
+import { Hero } from '@/components/hero';
+import { Leaderboard } from '@/components/leaderboard';
+import { Navbar } from '@/components/navbar';
 
 export default function Welcome() {
     return (
         <>
-            <h1 className="text-2xl font-bold">Welcome to Pace Nation!</h1>
-            <p className="mt-4 text-lg text-muted-foreground">
-                This is the welcome page. You can edit this page at{" "}
-                <code className="rounded bg-muted px-1 font-mono text-sm">
-                    resources/js/pages/welcome.tsx
-                </code>
-                .
-            </p>
-            <Button className="mt-6" onClick={() => alert("Button clicked!")} variant="outline">
-                Click me
-            </Button>
+            <Head title="Home - Regional Strava Leaderboards" />
+
+            <div className="min-h-screen bg-background">
+                <Navbar />
+
+                <main>
+                    <Hero />
+                    <Leaderboard />
+                </main>
+
+                <Footer />
+            </div>
         </>
     );
 }
