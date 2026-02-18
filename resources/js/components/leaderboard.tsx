@@ -3,13 +3,19 @@ import { ArrowRight, Medal } from 'lucide-react';
 
 import { LeaderboardItem } from '@/components/leaderboard-item';
 import { Button } from '@/components/ui/button';
-import { MOCK_USERS } from '@/data/mock-leaderboard';
 import { cn } from '@/lib/utils';
+import type { LeaderboardUser } from '@/types/leaderboard';
 
-const PREVIEW_COUNT = 5;
+type LeaderboardProps = {
+    users: LeaderboardUser[];
+};
 
-export function Leaderboard() {
-    const displayedUsers = MOCK_USERS.slice(0, PREVIEW_COUNT);
+export function Leaderboard({ users = [] }: LeaderboardProps) {
+    if (users.length === 0) {
+        return null;
+    }
+
+    console.log('Rendering Leaderboard with users:', users);
 
     return (
         <section className="py-16">
@@ -48,7 +54,7 @@ export function Leaderboard() {
 
                     {/* List */}
                     <div className="divide-y divide-border/50">
-                        {displayedUsers.map((user, index) => (
+                        {users.map((user, index) => (
                             <LeaderboardItem key={user.rank} user={user} animationDelay={100 + index * 30} />
                         ))}
                     </div>

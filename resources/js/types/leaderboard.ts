@@ -25,7 +25,14 @@ export type LeaderboardFilters = {
 export type Country = {
     code: string;
     name: string;
-    regions: string[];
+    regions?: string[];
+};
+
+export type PaginationData = {
+    currentPage: number;
+    totalPages: number;
+    totalItems: number;
+    perPage: number;
 };
 
 /**
@@ -45,6 +52,7 @@ export const KM_RANGES: KmRange[] = [
  * Maps ISO 3166-1 alpha-2 country codes to emoji flags
  */
 export function getCountryFlag(countryCode: string): string {
+    if (!countryCode) return '';
     const codePoints = countryCode
         .toUpperCase()
         .split('')
@@ -56,72 +64,11 @@ export function getCountryFlag(countryCode: string): string {
  * Formats distance in kilometers with appropriate suffix
  */
 export function formatDistance(km: number): string {
+    if (km === undefined || km === null) {
+        return '0';
+    }
     if (km >= 1000) {
         return `${(km / 1000).toFixed(1)}k`;
     }
     return km.toLocaleString();
-}
-
-/**
- * Filters users based on the provided filters
- */
-export function filterUsers(users: LeaderboardUser[], filters: LeaderboardFilters): LeaderboardUser[] {
-    let filtered = [...users];
-
-    // Filter by country
-    if (filters.country && filters.country !== 'all') {
-        filtered = filtered.filter((user) => user.countryCode === filters.country);
-    }
-
-    // Filter by region
-    if (filters.region && filters.region !== 'all') {
-        filtered = filtered.filter((user) => user.region === filters.region);
-    }
-
-    // Filter by KM range
-    if (filters.kmRange && filters.kmRange !== 'all') {
-        const range = KM_RANGES.find((r) => r.value === filters.kmRange);
-        if (range) {
-            filtered = filtered.filter((user) => {
-                if (range.min !== null && user.totalKm < range.min) return false;
-                if (range.max !== null && user.totalKm >= range.max) return false;
-                return true;
-            });
-        }
-    }
-
-    // Filter by search term
-    if (filters.search && filters.search.trim() !== '') {
-        const searchLower = filters.search.toLowerCase().trim();
-        filtered = filtered.filter((user) => user.name.toLowerCase().includes(searchLower));
-    }
-
-    return filtered;
-}
-
-/**
- * Paginates an array of users
- */
-export function paginateUsers(
-    users: LeaderboardUser[],
-    page: number,
-    perPage: number,
-): {
-    data: LeaderboardUser[];
-    totalPages: number;
-    totalItems: number;
-    currentPage: number;
-} {
-    const totalItems = users.length;
-    const totalPages = Math.ceil(totalItems / perPage);
-    const currentPage = Math.min(Math.max(1, page), totalPages || 1);
-    const startIndex = (currentPage - 1) * perPage;
-    const data = users.slice(startIndex, startIndex + perPage);
-
-    return {
-        data,
-        totalPages,
-        totalItems,
-        currentPage,
-    };
 }

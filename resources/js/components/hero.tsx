@@ -74,7 +74,7 @@ export function Hero() {
                             )}
                         >
                             <MapPin className="h-4 w-4" />
-                            Portugal
+                            Country
                         </button>
                         <button
                             className={cn(
@@ -84,7 +84,7 @@ export function Hero() {
                                 'transition-all hover:border-[var(--strava-orange)] hover:text-[var(--strava-orange)]',
                             )}
                         >
-                            All Regions
+                            Regions
                         </button>
                         <button
                             className={cn(
@@ -94,7 +94,7 @@ export function Hero() {
                                 'transition-all hover:border-[var(--strava-orange)] hover:text-[var(--strava-orange)]',
                             )}
                         >
-                            This Month
+                            And More...
                         </button>
                     </div>
                 </div>

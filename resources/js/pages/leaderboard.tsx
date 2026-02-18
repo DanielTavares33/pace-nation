@@ -1,6 +1,6 @@
-import { Head, Link } from '@inertiajs/react';
+import { Head, Link, router } from '@inertiajs/react';
 import { ArrowLeft, Medal, Users } from 'lucide-react';
-import { useMemo, useState } from 'react';
+import { useCallback } from 'react';
 
 import { Footer } from '@/components/footer';
 import { LeaderboardFiltersBar } from '@/components/leaderboard-filters';
@@ -8,40 +8,62 @@ import { LeaderboardItem } from '@/components/leaderboard-item';
 import { LeaderboardPagination } from '@/components/leaderboard-pagination';
 import { LeaderboardSearch } from '@/components/leaderboard-search';
 import { Navbar } from '@/components/navbar';
-import { MOCK_USERS } from '@/data/mock-leaderboard';
 import { cn } from '@/lib/utils';
-import { filterUsers, type LeaderboardFilters, paginateUsers } from '@/types/leaderboard';
+import type { Country, LeaderboardFilters, LeaderboardUser, PaginationData } from '@/types/leaderboard';
 
-const ITEMS_PER_PAGE = 10;
+type LeaderboardPageProps = {
+    users: LeaderboardUser[];
+    countries: Country[];
+    regions: string[];
+    filters: LeaderboardFilters;
+    pagination: PaginationData;
+};
 
-export default function LeaderboardPage() {
-    const [filters, setFilters] = useState<LeaderboardFilters>({
-        country: 'all',
-        region: 'all',
-        kmRange: 'all',
-        search: '',
-    });
-    const [currentPage, setCurrentPage] = useState(1);
+export default function LeaderboardPage({ users, countries, regions, filters, pagination }: LeaderboardPageProps) {
+    // Update filters via Inertia router (server-side filtering)
+    const handleFiltersChange = useCallback((newFilters: LeaderboardFilters) => {
+        router.get(
+            '/leaderboard',
+            {
+                country: newFilters.country !== 'all' ? newFilters.country : undefined,
+                region: newFilters.region !== 'all' ? newFilters.region : undefined,
+                kmRange: newFilters.kmRange !== 'all' ? newFilters.kmRange : undefined,
+                search: newFilters.search || undefined,
+                page: 1, // Reset to page 1 when filters change
+            },
+            {
+                preserveState: true,
+                preserveScroll: true,
+            },
+        );
+    }, []);
 
-    // Filter and paginate users
-    const filteredUsers = useMemo(() => {
-        return filterUsers(MOCK_USERS, filters);
-    }, [filters]);
+    const handleSearchChange = useCallback(
+        (search: string) => {
+            handleFiltersChange({ ...filters, search });
+        },
+        [filters, handleFiltersChange],
+    );
 
-    const paginatedData = useMemo(() => {
-        return paginateUsers(filteredUsers, currentPage, ITEMS_PER_PAGE);
-    }, [filteredUsers, currentPage]);
-
-    // Reset to page 1 when filters change
-    const handleFiltersChange = (newFilters: LeaderboardFilters) => {
-        setFilters(newFilters);
-        setCurrentPage(1);
-    };
-
-    const handleSearchChange = (search: string) => {
-        setFilters((prev) => ({ ...prev, search }));
-        setCurrentPage(1);
-    };
+    const handlePageChange = useCallback(
+        (page: number) => {
+            router.get(
+                '/leaderboard',
+                {
+                    country: filters.country !== 'all' ? filters.country : undefined,
+                    region: filters.region !== 'all' ? filters.region : undefined,
+                    kmRange: filters.kmRange !== 'all' ? filters.kmRange : undefined,
+                    search: filters.search || undefined,
+                    page,
+                },
+                {
+                    preserveState: true,
+                    preserveScroll: false,
+                },
+            );
+        },
+        [filters],
+    );
 
     return (
         <>
@@ -86,8 +108,8 @@ export default function LeaderboardPage() {
 
                         {/* Filters */}
                         <div className="mb-6 space-y-4">
-                            <LeaderboardFiltersBar filters={filters} onFiltersChange={handleFiltersChange} />
-                            <LeaderboardSearch value={filters.search} onChange={handleSearchChange} totalResults={filteredUsers.length} />
+                            <LeaderboardFiltersBar filters={filters} countries={countries} regions={regions} onFiltersChange={handleFiltersChange} />
+                            <LeaderboardSearch value={filters.search} onChange={handleSearchChange} totalResults={pagination.totalItems} />
                         </div>
 
                         {/* Leaderboard */}
@@ -105,9 +127,9 @@ export default function LeaderboardPage() {
                             </div>
 
                             {/* List */}
-                            {paginatedData.data.length > 0 ? (
+                            {users.length > 0 ? (
                                 <div className="divide-y divide-border/50">
-                                    {paginatedData.data.map((user, index) => (
+                                    {users.map((user, index) => (
                                         <LeaderboardItem key={user.rank} user={user} animationDelay={50 + index * 30} />
                                     ))}
                                 </div>
@@ -139,13 +161,13 @@ export default function LeaderboardPage() {
                         </div>
 
                         {/* Pagination */}
-                        {paginatedData.totalPages > 1 && (
+                        {pagination.totalPages > 1 && (
                             <LeaderboardPagination
-                                currentPage={paginatedData.currentPage}
-                                totalPages={paginatedData.totalPages}
-                                totalItems={paginatedData.totalItems}
-                                perPage={ITEMS_PER_PAGE}
-                                onPageChange={setCurrentPage}
+                                currentPage={pagination.currentPage}
+                                totalPages={pagination.totalPages}
+                                totalItems={pagination.totalItems}
+                                perPage={pagination.perPage}
+                                onPageChange={handlePageChange}
                             />
                         )}
                     </div>

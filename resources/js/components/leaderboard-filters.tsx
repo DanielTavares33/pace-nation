@@ -1,20 +1,17 @@
 import { Globe, MapPin, Ruler } from 'lucide-react';
 
-import { getAvailableCountries, getRegionsForCountry } from '@/data/mock-leaderboard';
-import { cn } from '@/lib/utils';
-import { getCountryFlag, KM_RANGES, type LeaderboardFilters } from '@/types/leaderboard';
-
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { cn } from '@/lib/utils';
+import { getCountryFlag, KM_RANGES, type Country, type LeaderboardFilters } from '@/types/leaderboard';
 
 type LeaderboardFiltersProps = {
     filters: LeaderboardFilters;
+    countries: Country[];
+    regions: string[];
     onFiltersChange: (filters: LeaderboardFilters) => void;
 };
 
-export function LeaderboardFiltersBar({ filters, onFiltersChange }: LeaderboardFiltersProps) {
-    const countries = getAvailableCountries();
-    const regions = filters.country && filters.country !== 'all' ? getRegionsForCountry(filters.country) : [];
-
+export function LeaderboardFiltersBar({ filters, countries, regions, onFiltersChange }: LeaderboardFiltersProps) {
     const handleCountryChange = (value: string) => {
         onFiltersChange({
             ...filters,
