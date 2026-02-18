@@ -19,9 +19,22 @@ export default defineConfig({
         tailwindcss(),
         wayfinder({
             formVariants: true,
+            // Skip generation when running in Docker (Node container has no PHP)
+            // Types must be pre-generated in the PHP container
+            command: process.env.SKIP_WAYFINDER_GENERATE ? 'true' : undefined,
         }),
     ],
     esbuild: {
         jsx: 'automatic',
+    },
+    server: {
+        host: '0.0.0.0',
+        port: 5173,
+        hmr: {
+            host: 'localhost',
+        },
+        watch: {
+            ignored: ['**/storage/framework/views/**'],
+        },
     },
 });
