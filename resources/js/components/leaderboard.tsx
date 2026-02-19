@@ -15,8 +15,6 @@ export function Leaderboard({ users = [] }: LeaderboardProps) {
         return null;
     }
 
-    console.log('Rendering Leaderboard with users:', users);
-
     return (
         <section className="py-16">
             <div className="mx-auto max-w-4xl px-4 sm:px-6 lg:px-8">
